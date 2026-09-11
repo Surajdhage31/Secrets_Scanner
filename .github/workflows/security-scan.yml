@@ -16,19 +16,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-
       - name: Run Secret Scanner
         run: |
-          # Run scanner: prints human-readable table to runner console
-          python Scanner.py . --format table
-          
-          # Capture scanner exit code (0 = clean, 1 = secret found)
+          # 1. Run the scan once and save the output directly to JSON
+              python Scanner.py . --format json > scan_report.json || true
+
+          # 2. Print human-readable output to console
+            python Scanner.py . --format table
           SCAN_STATUS=$?
 
-          # Also save full JSON report for inspection
-          python Scanner.py . --format json > scan_report.json
-
-          # Fail the job if secrets were detected
+          # 3. Fail the job if secrets were detected
           if [ $SCAN_STATUS -ne 0 ]; then
             echo "::error::Hardcoded credentials detected! Build flagged as failed."
             exit 1

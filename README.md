@@ -35,13 +35,16 @@ To satisfy low false-alarm requirements:
 The scanner requires **Python 3.8+** with no third-party package dependencies.
 
 ### Local Scan (Human-Readable) 
-bash
-python scanner.py /path/to/project
+```bash
+python Scanner.py /path/to/project
+```
 
 ### Machine-Readable Output (JSON for CI)
 Bash
-python scanner.py /path/to/project --json > scan_output.json
+python Scanner.py /path/to/project --format json > scan_output.json
+
 Exit Codes
+
 0: Clean scan. No credentials detected.
 
 1: Hardcoded secret(s) found. Pipeline fails.
@@ -52,9 +55,9 @@ Exit Codes
  To run GitKeyScan automatically on pull requests using GitHub Actions, add this workflow file to
  .github/workflows/secret-scan.yml:
 
-```YAML
+```
+YAML
 name: Security Secrets Audit
-
 on:
   pull_request:
     branches: [ main, master ]
@@ -78,7 +81,8 @@ jobs:
           python scanner.py . --json > scan_results.json
 ```
 ### 5. Sample Output (sample_output.json)
-```JSON
+```
+JSON
 {
   "scan_metadata": {
     "scanner": "GitKeyScan",
@@ -99,15 +103,15 @@ jobs:
  }
 ```
 ### 6. Limitations (What This Tool Does Not Catch)
- -- In accordance with keeping the false-positive rate low and the codebase lightweight, this scanner explicitly does not detect:
+ * In accordance with keeping the false-positive rate low and the codebase lightweight, this scanner explicitly does not detect:
 
- -- Entropy-Based Unstructured Secrets: Generic high-entropy strings without predictable vendor prefixes (e.g., arbitrary             database passwords, custom API tokens).
+ * Entropy-Based Unstructured Secrets: Generic high-entropy strings without predictable vendor prefixes (e.g., arbitrary             database passwords, custom API tokens).
 
- -- Base64 / Hex Obfuscated Strings: Secrets that have been encoded or split across string concatenations (e.g., "AKI" + "A...").
+ * Base64 / Hex Obfuscated Strings: Secrets that have been encoded or split across string concatenations (e.g., "AKI" + "A...").
 
- -- Environment Variables & Runtime Configurations: Secrets injected dynamically at runtime via .env files added to .gitignore,      cloud secret managers, or deployment orchestrators.
+ * Environment Variables & Runtime Configurations: Secrets injected dynamically at runtime via .env files added to .gitignore,      cloud secret managers, or deployment orchestrators.
 
---  Secondary Key Pair Validation: The scanner detects key identifiers (such as AKIA...) statically, but cannot determine    
+ * Secondary Key Pair Validation: The scanner detects key identifiers (such as AKIA...) statically, but cannot determine    
     whether the key is active, rotated, or revoked by the cloud vendor.
 
 

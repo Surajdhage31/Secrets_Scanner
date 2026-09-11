@@ -3,7 +3,7 @@ name: Secrets Detection Scan
 on:
   push:
     branches:
-      - "**"  # Runs on every push to any branch
+      - "**"
 
 jobs:
   scanner:
@@ -17,18 +17,18 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Create Simulated Leak for CI Testing
+        run: |
+          # Creates a test file dynamically inside runner so GitHub Push Protection doesn't block git push
+          echo 'AWS_KEY="AKIAIOSFODNN7EXAMPLE"' > live_leak_test.py
+
       - name: Run Secret Scanner
         run: |
-          # Run scanner: prints human-readable table to runner console
           python Scanner.py . --format table
-          
-          # Capture scanner exit code (0 = clean, 1 = secret found)
           SCAN_STATUS=$?
 
-          # Also save full JSON report for inspection
           python Scanner.py . --format json > scan_report.json
 
-          # Fail the job if secrets were detected
           if [ $SCAN_STATUS -ne 0 ]; then
             echo "::error::Hardcoded credentials detected! Build flagged as failed."
             exit 1
